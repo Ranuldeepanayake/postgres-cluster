@@ -8,7 +8,7 @@ restapi:
 
 etcd:
   hosts:
-    - patroni-1:2379  #Client port for Patroni to connect to etcd. etcd members will use 2380 for peer communication.
+    - patroni-1:2379 
     - patroni-2:2379
     - patroni-3:2379
 

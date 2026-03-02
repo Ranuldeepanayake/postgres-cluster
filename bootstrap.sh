@@ -1,37 +1,6 @@
 #!/bin/bash
 set -e
 
-export DEBIAN_FRONTEND=noninteractive
-
-echo "Updating packages..."
-apt-get update
-
-echo "Installing dependencies..."
-apt-get install -y \
-    curl \
-    gnupg \
-    lsb-release \
-    python3 \
-    python3-pip \
-    python3-psycopg2 \
-    python3-yaml \
-    python3-click \
-    wget
-
-echo "Adding PostgreSQL repo..."
-curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
-
-echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] http://apt.postgresql.org/pub/repos/apt noble-pgdg main" \
-> /etc/apt/sources.list.d/pgdg.list
-
-apt-get update
-
-echo "Installing PostgreSQL 18..."
-apt-get install -y postgresql-18 postgresql-client-18 etcd
-
-echo "Installing Patroni..."
-pip3 install patroni[etcd]
-
 #Start etcd cluster member
 ETCD_NAME=$(hostname)
 
@@ -46,11 +15,10 @@ etcd \
   --initial-cluster-state new &
 
 #Wait for etcd to become available
-sleep 30
-
-echo "Preparing data directory..."
-mkdir -p /home/postgres/pgdata
-chown -R postgres:postgres /home/postgres
+until curl -sf http://localhost:2379/health; do
+  echo "Waiting for etcd..."
+  sleep 2
+done
 
 echo "Starting Patroni..."
 su postgres -c "patroni /etc/patroni.yml"
