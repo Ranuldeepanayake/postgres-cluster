@@ -6,11 +6,14 @@ restapi:
   listen: 0.0.0.0:8008
   connect_address: patroni-1:8008
 
-etcd:
+etcd3:
   hosts:
     - patroni-1:2379 
     - patroni-2:2379
     - patroni-3:2379
+  protocol: http
+  timeout: 30
+  api_version: v3
 
 bootstrap:
   dcs:
@@ -46,6 +49,9 @@ postgresql:
   connect_address: patroni-1:5432
   data_dir: /home/postgres/pgdata
   bin_dir: /usr/lib/postgresql/18/bin
+  pg_hba:
+    - host all all 127.0.0.1/32 md5
+    - host replication replication 172.18.0.0/16 md5
   authentication:
     replication:
       username: replication

@@ -22,13 +22,14 @@ RUN curl -L https://github.com/etcd-io/etcd/releases/download/${ETCD_VER}/etcd-$
 RUN pip3 install --break-system-packages patroni[etcd]
 
 #Set directory pemissions.
-RUN mkdir -p /home/postgres/pgdata /var/lib/etcd && chown -R postgres:postgres /home/postgres /var/lib/etcd
+RUN mkdir -p /home/postgres/pgdata /var/lib/etcd 
+RUN chown -R postgres:postgres /home/postgres /var/lib/etcd
+RUN chmod -R 700 /home/postgres/pgdata
 
 #Copy the startup script.
 COPY bootstrap.sh /bootstrap.sh
-RUN chmod +x /bootstrap.sh
-
+RUN chmod +x /bootstrap.sh && chown postgres:postgres /bootstrap.sh
 USER postgres
 EXPOSE 5432 8008 2379 2380
 
-ENTRYPOINT ["/bootstrap.sh"]
+ENTRYPOINT ["/bin/bash", "/bootstrap.sh"]

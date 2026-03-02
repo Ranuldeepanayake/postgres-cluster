@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
-#Start etcd cluster member
+#Enable the v3 API for etcdctl.
+export ETCDCTL_API=3
+
+#Start etcd cluster member.
 ETCD_NAME=$(hostname)
 
 etcd \
@@ -20,5 +23,8 @@ until curl -sf http://localhost:2379/health; do
   sleep 2
 done
 
+etcdctl --endpoints=http://patroni-1:2379,http://patroni-2:2379,http://patroni-3:2379 endpoint health
+etcdctl --endpoints=http://patroni-1:2379,http://patroni-2:2379,http://patroni-3:2379 get / --prefix
+
 echo "Starting Patroni..."
-su postgres -c "patroni /etc/patroni.yml"
+patroni /home/postgres/patroni.yml

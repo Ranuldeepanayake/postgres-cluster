@@ -1,10 +1,11 @@
 services:
   patroni-1:
-    image: ubuntu:24.04
-    container_name: postgres-cluster:latest
+    image: postgres-cluster:latest
+    container_name: patroni-1
+    hostname: patroni-1
     volumes:
       - ./bootstrap.sh:/bootstrap.sh
-      - ./patroni-1.yaml:/etc/patroni.yml
+      - ./patroni-1.yaml:/home/postgres/patroni.yml
       - etcd-1-data:/var/lib/etcd
       - patroni-1-data:/home/postgres/pgdata
     ports:
@@ -16,9 +17,10 @@ services:
   patroni-2:
     image: postgres-cluster:latest
     container_name: patroni-2
+    hostname: patroni-2
     volumes:
       - ./bootstrap.sh:/bootstrap.sh
-      - ./patroni-2.yaml:/etc/patroni.yml
+      - ./patroni-2.yaml:/home/postgres/patroni.yml
       - etcd-2-data:/var/lib/etcd
       - patroni-2-data:/home/postgres/pgdata
     ports:
@@ -26,13 +28,16 @@ services:
       - "8002:8008"
     networks:
       - postgres-cluster
+    depends_on:
+      - patroni-1
 
   patroni-3:
     image: postgres-cluster:latest
     container_name: patroni-3
+    hostname: patroni-3
     volumes:
       - ./bootstrap.sh:/bootstrap.sh
-      - ./patroni-3.yaml:/etc/patroni.yml
+      - ./patroni-3.yaml:/home/postgres/patroni.yml
       - etcd-3-data:/var/lib/etcd
       - patroni-3-data:/home/postgres/pgdata
     ports:
@@ -40,6 +45,8 @@ services:
       - "8003:8008"
     networks:
       - postgres-cluster
+    depends_on:
+      - patroni-2
 
   haproxy:
     image: haproxy:2.8
@@ -52,10 +59,10 @@ services:
       - "8404:8404" #HAProxy stats page.
     networks:
       - postgres-cluster
-    # depends_on:
-    #   - patroni-1
-    #   - patroni-2
-    #   - patroni-3
+    depends_on:
+      - patroni-1
+      - patroni-2
+      - patroni-3
 
 volumes:
   patroni-1-data:
