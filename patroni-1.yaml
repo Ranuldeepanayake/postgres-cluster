@@ -50,8 +50,14 @@ postgresql:
   data_dir: /home/postgres/pgdata
   bin_dir: /usr/lib/postgresql/18/bin
   pg_hba:
+      #Any user can connect to the postgres database over the UNIX socket with a password.
+    - local all postgres md5
+      #Any user can connect to any database over TCP IP from the allowed source IP range with a password.
     - host all all 127.0.0.1/32 md5
+      #The replication user can connect to the replication database over TCP IP from the allowed source IP range with a password.
     - host replication replication 172.18.0.0/16 md5
+      #Any user can connect to any database over TCP IP from the allowed source IP range with a password.
+    - host all all 172.18.0.0/16 md5
   authentication:
     replication:
       username: replication

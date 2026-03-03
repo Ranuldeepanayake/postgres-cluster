@@ -50,8 +50,10 @@ postgresql:
   data_dir: /home/postgres/pgdata
   bin_dir: /usr/lib/postgresql/18/bin
   pg_hba:
+    - local all postgres md5
     - host all all 127.0.0.1/32 md5
     - host replication replication 172.18.0.0/16 md5
+    - host all all 172.18.0.0/16 md5
   authentication:
     replication:
       username: replication
